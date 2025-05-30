@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /unfedZombie/Controllers/admin/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^api/(.*)$ adminController.php?route=$1 [QSA,L]

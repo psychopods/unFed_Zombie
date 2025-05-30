@@ -5,7 +5,6 @@ require '../Config/config.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-$secret_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30";
 $issuer_claim = "localhost";
 $audience_claim = "localhost";
 $issuedat_claim = time();
@@ -67,6 +66,7 @@ function signup($link) {
 }
 
 // LOGIN FUNCTION
+//api endpoint ake ni "http://localhost/unfedZombie/Controllers/authController.php/login"
 function login($link) {
     global $secret_key, $issuer_claim, $audience_claim, $issuedat_claim, $expire_claim;
 

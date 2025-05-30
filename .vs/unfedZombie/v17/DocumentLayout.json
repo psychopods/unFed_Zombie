@@ -1,0 +1,88 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\xampp\\htdocs\\unfedZombie\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\xampp\\htdocs\\unfedZombie\\Controllers\\authController.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\authController.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\xampp\\htdocs\\unfedZombie\\Controllers\\admin\\adminController.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\admin\\adminController.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\xampp\\htdocs\\unfedZombie\\Controllers\\admin\\.htaccess||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\admin\\.htaccess||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\xampp\\htdocs\\unfedZombie\\Config\\config.php||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Config\\config.php||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": ".htaccess",
+              "DocumentMoniker": "C:\\xampp\\htdocs\\unfedZombie\\Controllers\\admin\\.htaccess",
+              "RelativeDocumentMoniker": "Controllers\\admin\\.htaccess",
+              "ToolTip": "C:\\xampp\\htdocs\\unfedZombie\\Controllers\\admin\\.htaccess",
+              "RelativeToolTip": "Controllers\\admin\\.htaccess",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-05-30T07:29:57.063Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "adminController.php",
+              "DocumentMoniker": "C:\\xampp\\htdocs\\unfedZombie\\Controllers\\admin\\adminController.php",
+              "RelativeDocumentMoniker": "Controllers\\admin\\adminController.php",
+              "ToolTip": "C:\\xampp\\htdocs\\unfedZombie\\Controllers\\admin\\adminController.php",
+              "RelativeToolTip": "Controllers\\admin\\adminController.php",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-05-30T07:15:43.797Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "authController.php",
+              "DocumentMoniker": "C:\\xampp\\htdocs\\unfedZombie\\Controllers\\authController.php",
+              "RelativeDocumentMoniker": "Controllers\\authController.php",
+              "ToolTip": "C:\\xampp\\htdocs\\unfedZombie\\Controllers\\authController.php",
+              "RelativeToolTip": "Controllers\\authController.php",
+              "ViewState": "AgIAAGsAAAAAAAAAAAAAADoAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-05-30T07:14:44.571Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "config.php",
+              "DocumentMoniker": "C:\\xampp\\htdocs\\unfedZombie\\Config\\config.php",
+              "RelativeDocumentMoniker": "Config\\config.php",
+              "ToolTip": "C:\\xampp\\htdocs\\unfedZombie\\Config\\config.php",
+              "RelativeToolTip": "Config\\config.php",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002338|",
+              "WhenOpened": "2025-05-30T07:13:34.815Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
