@@ -1,7 +1,7 @@
 RewriteEngine On
-RewriteBase /unfedZombie/Controllers/admin/
+RewriteBase /unfedZombie/Controllers/storeKeeper/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-RewriteRule ^api/(.*)$ adminController.php?route=$1 [QSA,L]
+RewriteRule ^api/(.*)$ storeController.php?route=$1 [QSA,L]

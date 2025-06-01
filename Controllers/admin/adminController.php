@@ -58,6 +58,10 @@ elseif (strpos($path, '/api/admin/items') !== false && $method === 'POST') {
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/items
     createItem($link);
 }
+elseif (preg_match('#/api/admin/items/(\d+)$#', $path, $matches) && $method === 'PUT') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/items/:id
+    updateItem($link, $matches[1]);
+}
 elseif (strpos($path, '/api/admin/requests') !==false  && $method === 'GET') {
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/requests
     listRequests($link);
