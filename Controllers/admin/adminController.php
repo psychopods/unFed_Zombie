@@ -50,17 +50,14 @@ if (strpos($path, '/api/admin/users') !== false && $method === 'GET') {
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/users
     listUsers($link);
 } 
-
 elseif(strpos($path, "/api/admin/getitems") !== false && $method === "GET"){
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/getitems
     listItems($link);
 }
-
 elseif (strpos($path, '/api/admin/items') !== false && $method === 'POST') {
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/items
     createItem($link);
 }
-
 elseif (strpos($path, '/api/admin/requests') !==false  && $method === 'GET') {
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/requests
     listRequests($link);
@@ -70,26 +67,18 @@ elseif (strpos($path, '/api/admin/dispatch') !== false && $method === 'POST') {
     //its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/dispatch
     dispatchItems($link);
 }
-
-
-elseif (strpos($path, "/api/admin/items/:id", $matches) !== false && $method === 'DELETE') {
+elseif (preg_match('#/api/admin/items/(\d+)$#', $path, $matches) && $method === 'DELETE') {
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/items/:id
     deleteItem($link, $matches[1]);
 }
-
-elseif (strpos($path,"/api/admin/approve-request/:id", $matches) !== false && $method === 'PUT') {
-    //its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/approve-request/:id
+elseif (preg_match('#/api/admin/approve-request/(\d+)$#', $path, $matches) && $method === 'PUT') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/approve-request/:id
     approveRequest($link, $matches[1]);
 }
-
-elseif (strpos($path, "/api/admin/authorize-request/:id", $matches) !== false && $method === 'PUT') {
-    //its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/authorize-request/:id
+elseif (preg_match('#/api/admin/authorize-request/(\d+)$#', $path, $matches) && $method === 'PUT') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/authorize-request/:id
     authorizeRequest($link, $matches[1]);
-}
-
-
-
-else {
+} else {
     http_response_code(404);
     echo json_encode(["message" => "Endpoint not found"]);
 }
