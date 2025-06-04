@@ -168,7 +168,7 @@ function authorizeRequest($link, $id) {
 function dispatchItems($link) {
     $data = json_decode(file_get_contents("php://input"), true);
     $stmt = mysqli_prepare($link, "INSERT INTO dispatches (item_id, quantity, dispatched_by, dispatched_at) VALUES (?, ?, ?, NOW())");
-    mysqli_stmt_bind_param($stmt, "iis", $data['item_id'], $data['quantity'], $data['dispatched_by']);
+    mysqli_stmt_bind_param($stmt, "iii", $data['item_id'], $data['quantity'], $data['dispatched_by']);
     if (mysqli_stmt_execute($stmt)) {
         echo json_encode(["message" => "Items dispatched"]);
     } else {

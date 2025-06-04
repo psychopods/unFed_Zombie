@@ -34,23 +34,23 @@ function isStoreKeeper($link, $role_id) {
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $role = mysqli_fetch_assoc($result);
-    return $role && strtolower($role['name']) === 'storekeeper';
+    return $role && strtolower($role['name']) === 'quartermaster';
 }
 
 if (!isStoreKeeper($link, $role_id)) {
     http_response_code(403);
-    echo json_encode(["message" => "Access denied. StoreKeepers only."]);
+    echo json_encode(["message" => "Access denied. QuarterMasters only."]);
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
 $route = $_GET['route'] ?? '';
 
-if ($route === 'stock/view' && $method === 'GET') { // http://localhost/unfedZombie/Controllers/storeKeeper/api/stock/view
+if ($route === 'stock/view' && $method === 'GET') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/stock/view
     viewStock($link);
-} elseif ($route === 'requests/ready' && $method === 'GET') { // http://localhost/unfedZombie/Controllers/storeKeeper/api/requests/ready
+} elseif ($route === 'requests/ready' && $method === 'GET') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/requests/ready
     viewDispatchableRequests($link);
-} elseif ($route === 'dispatch/item' && $method === 'POST') { // http://localhost/unfedZombie/Controllers/storeKeeper/api/dispatch/item
+} elseif ($route === 'dispatch/item' && $method === 'POST') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/dispatch/item
     dispatchItem($link, $user_id);
 } else {
     http_response_code(404);
