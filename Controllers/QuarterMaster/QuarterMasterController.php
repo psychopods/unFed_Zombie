@@ -46,16 +46,99 @@ if (!isStoreKeeper($link, $role_id)) {
 $method = $_SERVER['REQUEST_METHOD'];
 $route = $_GET['route'] ?? '';
 
-if ($route === 'stock/view' && $method === 'GET') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/stock/view
+// Inventory management
+if ($route === 'stock/view' && $method === 'GET') {
     viewStock($link);
-} elseif ($route === 'requests/ready' && $method === 'GET') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/requests/ready
+} elseif ($route === 'stock/update' && $method === 'PUT') {
+    updateStock($link);
+} elseif ($route === 'items/add' && $method === 'POST') {
+    addItem($link);
+} elseif ($route === 'items/update' && $method === 'PUT') {
+    updateItem($link);
+} elseif ($route === 'items/delete' && $method === 'DELETE') {
+    deleteItem($link);
+} elseif ($route === 'requests/ready' && $method === 'GET') {
     viewDispatchableRequests($link);
-} elseif ($route === 'dispatch/item' && $method === 'POST') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/dispatch/item
+} elseif ($route === 'dispatch/item' && $method === 'POST') {
     dispatchItem($link, $user_id);
+} elseif ($route === 'requests/authorize' && $method === 'PUT') {
+    authorizeRequest($link, $user_id);
 } else {
     http_response_code(404);
     echo json_encode(["message" => "Route not found"]);
 }
+
+// --- Inventory Management Functions ---
+
+function addItem($link) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $stmt = mysqli_prepare($link, "INSERT INTO items (name, description, sku, category_id, unit, reorder_level) VALUES (?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "sssisi", $data['name'], $data['description'], $data['sku'], $data['category_id'], $data['unit'], $data['reorder_level']);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Item added"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function updateItem($link) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $stmt = mysqli_prepare($link, "UPDATE items SET name=?, description=?, sku=?, category_id=?, unit=?, reorder_level=? WHERE id=?");
+    mysqli_stmt_bind_param($stmt, "sssissi", $data['name'], $data['description'], $data['sku'], $data['category_id'], $data['unit'], $data['reorder_level'], $data['id']);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Item updated"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function deleteItem($link) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $stmt = mysqli_prepare($link, "DELETE FROM items WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $data['id']);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Item deleted"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function updateStock($link) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $stmt = mysqli_prepare($link, "UPDATE inventory_stock SET quantity = ?, reserved_quantity = ? WHERE item_id = ?");
+    mysqli_stmt_bind_param($stmt, "iii", $data['quantity'], $data['reserved_quantity'], $data['item_id']);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Stock updated"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+// --- Authorize Request Function ---
+
+function authorizeRequest($link, $user_id) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $request_id = $data['request_id'] ?? null;
+    if (!$request_id) {
+        http_response_code(400);
+        echo json_encode(["message" => "Request ID is required"]);
+        return;
+    }
+    $stmt = mysqli_prepare($link, "UPDATE item_requests SET authorized = 1, authorized_at = NOW(), authorized_by = ? WHERE id = ? AND approved = 1 AND authorized = 0");
+    mysqli_stmt_bind_param($stmt, "ii", $user_id, $request_id);
+    if (mysqli_stmt_execute($stmt) && mysqli_stmt_affected_rows($stmt) > 0) {
+        echo json_encode(["message" => "Request authorized"]);
+    } else {
+        http_response_code(400);
+        echo json_encode(["message" => "Request not found or already authorized"]);
+    }
+}
+
+// --- Existing Functions ---
 
 function viewStock($link) {
     $query = "SELECT i.id, i.name, s.quantity, i.unit FROM items i JOIN inventory_stock s ON i.id = s.item_id";
