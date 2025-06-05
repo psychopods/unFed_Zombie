@@ -4,4 +4,6 @@ RewriteBase /unfedZombie/Controllers/QuarterMaster/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
+RewriteRule ^api/stock/update/([0-9]+)$ QuarterMasterController.php?route=stock/update&id=$1 [QSA,L]
+RewriteRule ^api/items/([0-9]+)$ QuarterMasterController.php?route=items&id=$1 [QSA,L]
 RewriteRule ^api/(.*)$ QuarterMasterController.php?route=$1 [QSA,L]

@@ -45,30 +45,39 @@ if (!isStoreKeeper($link, $role_id)) {
 
 $method = $_SERVER['REQUEST_METHOD'];
 $route = $_GET['route'] ?? '';
+$id = $_GET['id'] ?? null;
 
-// Inventory management
-if ($route === 'stock/view' && $method === 'GET') {
+if ($route === 'items' && $method === 'DELETE' && $id) {
+    deleteItem($link, $id);
+} elseif ($route === 'items' && $method === 'PUT' && $id) {
+    updateItem($link, $id);
+} elseif ($route === 'stock/view' && $method === 'GET') { // View stock, endpoint is http://localhost/unfedZombie/Controllers/QuarterMaster/api/stock/view
     viewStock($link);
-} elseif ($route === 'stock/update' && $method === 'PUT') {
-    updateStock($link);
-} elseif ($route === 'items/add' && $method === 'POST') {
+} elseif ($route === 'stock/update' && $method === 'PUT' && $id) { // api end point is http://localhost/unfedZombie/Controllers/QuarterMaster/api/stock/update/:id
+    updateStock($link, $id, $user_id);
+} elseif ($route === 'items/add' && $method === 'POST') { // api end point is http://localhost/unfedZombie/Controllers/QuarterMaster/api/items/add
     addItem($link);
-} elseif ($route === 'items/update' && $method === 'PUT') {
+} elseif ($route === 'items/update' && $method === 'PUT') { // api end point is http://localhost/unfedZombie/Controllers/QuarterMaster/api/items/:id
     updateItem($link);
-} elseif ($route === 'items/delete' && $method === 'DELETE') {
-    deleteItem($link);
-} elseif ($route === 'requests/ready' && $method === 'GET') {
+} elseif ($route === 'items/delete' && $method === 'DELETE') { // api end point is http://localhost/unfedZombie/Controllers/QuarterMaster/api/items/:id
+    $id = $_GET['id'] ?? null;
+    if ($id) {
+        deleteItem($link, $id);
+    } else {
+        http_response_code(400);
+        echo json_encode(["message" => "Item ID is required"]);
+    }
+} elseif ($route === 'requests/ready' && $method === 'GET') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/requests/ready
     viewDispatchableRequests($link);
-} elseif ($route === 'dispatch/item' && $method === 'POST') {
+} elseif ($route === 'dispatch/item' && $method === 'POST') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/dispatch/item
     dispatchItem($link, $user_id);
-} elseif ($route === 'requests/authorize' && $method === 'PUT') {
+} elseif ($route === 'requests/authorize' && $method === 'PUT') { // http://localhost/unfedZombie/Controllers/QuarterMaster/api/requests/authorize
     authorizeRequest($link, $user_id);
 } else {
     http_response_code(404);
     echo json_encode(["message" => "Route not found"]);
 }
 
-// --- Inventory Management Functions ---
 
 function addItem($link) {
     $data = json_decode(file_get_contents("php://input"), true);
@@ -82,10 +91,48 @@ function addItem($link) {
     }
 }
 
-function updateItem($link) {
+function updateItem($link, $id = null) {
     $data = json_decode(file_get_contents("php://input"), true);
-    $stmt = mysqli_prepare($link, "UPDATE items SET name=?, description=?, sku=?, category_id=?, unit=?, reorder_level=? WHERE id=?");
-    mysqli_stmt_bind_param($stmt, "sssissi", $data['name'], $data['description'], $data['sku'], $data['category_id'], $data['unit'], $data['reorder_level'], $data['id']);
+
+    if ($id === null) {
+        $id = $data['id'] ?? null;
+    }
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(["message" => "Item ID is required"]);
+        return;
+    }
+
+    $fields = ['name', 'description', 'sku', 'category_id', 'unit', 'reorder_level'];
+    $set = [];
+    $params = [];
+    $types = '';
+
+    foreach ($fields as $field) {
+        if (isset($data[$field])) {
+            $set[] = "$field = ?";
+            $params[] = $data[$field];
+            if (in_array($field, ['category_id', 'reorder_level'])) {
+                $types .= 'i';
+            } else {
+                $types .= 's';
+            }
+        }
+    }
+
+    if (empty($set)) {
+        http_response_code(400);
+        echo json_encode(["message" => "No fields to update"]);
+        return;
+    }
+
+    $params[] = $id;
+    $types .= 'i';
+
+    $sql = "UPDATE items SET " . implode(', ', $set) . " WHERE id = ?";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, $types, ...$params);
+
     if (mysqli_stmt_execute($stmt)) {
         echo json_encode(["message" => "Item updated"]);
     } else {
@@ -94,10 +141,9 @@ function updateItem($link) {
     }
 }
 
-function deleteItem($link) {
-    $data = json_decode(file_get_contents("php://input"), true);
+function deleteItem($link, $id) {
     $stmt = mysqli_prepare($link, "DELETE FROM items WHERE id = ?");
-    mysqli_stmt_bind_param($stmt, "i", $data['id']);
+    mysqli_stmt_bind_param($stmt, "i", $id);
     if (mysqli_stmt_execute($stmt)) {
         echo json_encode(["message" => "Item deleted"]);
     } else {
@@ -106,10 +152,57 @@ function deleteItem($link) {
     }
 }
 
-function updateStock($link) {
+function updateStock($link, $id = null, $user_id = null) {
     $data = json_decode(file_get_contents("php://input"), true);
-    $stmt = mysqli_prepare($link, "UPDATE inventory_stock SET quantity = ?, reserved_quantity = ? WHERE item_id = ?");
-    mysqli_stmt_bind_param($stmt, "iii", $data['quantity'], $data['reserved_quantity'], $data['item_id']);
+
+    if ($id === null) {
+        $id = $data['id'] ?? null;
+    }
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(["message" => "Stock ID is required"]);
+        return;
+    }
+
+    $fields = ['quantity', 'reserved_quantity', 'last_updated', 'updated_by'];
+    $set = [];
+    $params = [];
+    $types = '';
+
+    foreach ($fields as $field) {
+        if (isset($data[$field])) {
+            $set[] = "$field = ?";
+            $params[] = $data[$field];
+            if ($field === 'last_updated') {
+                $types .= 's';
+            } elseif ($field === 'updated_by') {
+                $types .= 'i';
+            } else {
+                $types .= 'i';
+            }
+        }
+    }
+
+    // If updated_by is not set in the body, set it to the current user
+    if (!in_array('updated_by', array_keys($data))) {
+        $set[] = "updated_by = ?";
+        $params[] = $user_id;
+        $types .= 'i';
+    }
+
+    if (empty($set)) {
+        http_response_code(400);
+        echo json_encode(["message" => "No fields to update"]);
+        return;
+    }
+
+    $params[] = $id;
+    $types .= 'i';
+
+    $sql = "UPDATE inventory_stock SET " . implode(', ', $set) . " WHERE id = ?";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, $types, ...$params);
+
     if (mysqli_stmt_execute($stmt)) {
         echo json_encode(["message" => "Stock updated"]);
     } else {
@@ -117,8 +210,6 @@ function updateStock($link) {
         echo json_encode(["error" => mysqli_error($link)]);
     }
 }
-
-// --- Authorize Request Function ---
 
 function authorizeRequest($link, $user_id) {
     $data = json_decode(file_get_contents("php://input"), true);
@@ -138,8 +229,6 @@ function authorizeRequest($link, $user_id) {
     }
 }
 
-// --- Existing Functions ---
-
 function viewStock($link) {
     $query = "SELECT i.id, i.name, s.quantity, i.unit FROM items i JOIN inventory_stock s ON i.id = s.item_id";
     $result = mysqli_query($link, $query);
@@ -152,7 +241,6 @@ function viewDispatchableRequests($link) {
               FROM item_requests r
               JOIN items i ON r.item_id = i.id
               WHERE r.status = 'authorized'";
-
     $result = mysqli_query($link, $query);
     $requests = mysqli_fetch_all($result, MYSQLI_ASSOC);
     echo json_encode($requests);
@@ -168,7 +256,6 @@ function dispatchItem($link, $dispatched_by) {
         return;
     }
 
- 
     $req_query = "SELECT item_id, quantity_requested FROM item_requests WHERE id = ? AND approved = 1 AND authorized = 1 AND dispatched = 0";
     $stmt = mysqli_prepare($link, $req_query);
     mysqli_stmt_bind_param($stmt, "i", $request_id);
@@ -197,7 +284,6 @@ function dispatchItem($link, $dispatched_by) {
         echo json_encode(["message" => "Insufficient stock"]);
         return;
     }
-
 
     mysqli_begin_transaction($link);
 
