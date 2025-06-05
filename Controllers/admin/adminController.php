@@ -126,6 +126,18 @@ elseif (preg_match('#/api/admin/roles/(\d+)$#', $path, $matches) && $method === 
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/roles/:id
     deleteRole($link, $matches[1]);
 }
+// GET all item categories
+elseif (strpos($path, '/api/admin/item-categories') !== false && $method === 'GET') {
+    getItemCategories($link);
+}
+// GET all roles
+elseif (strpos($path, '/api/admin/roles') !== false && $method === 'GET') {
+    getRoles($link);
+}
+// GET all role permissions
+elseif (strpos($path, '/api/admin/role-permissions') !== false && $method === 'GET') {
+    getRolePermissions($link);
+}
 else {
     http_response_code(404);
     echo json_encode(["message" => "Endpoint not found"]);
@@ -336,5 +348,29 @@ function deleteRole($link, $id) {
         http_response_code(500);
         echo json_encode(["error" => mysqli_error($link)]);
     }
+}
+
+function getItemCategories($link) {
+    $query = "SELECT id, name, description FROM item_categories";
+    $result = mysqli_query($link, $query);
+    $categories = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    echo json_encode($categories);
+}
+
+function getRoles($link) {
+    $query = "SELECT id, name, description FROM roles";
+    $result = mysqli_query($link, $query);
+    $roles = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    echo json_encode($roles);
+}
+
+function getRolePermissions($link) {
+    $query = "SELECT rp.id, r.name AS role, p.name AS permission 
+              FROM role_permissions rp
+              JOIN roles r ON rp.role_id = r.id
+              JOIN permissions p ON rp.permission_id = p.id";
+    $result = mysqli_query($link, $query);
+    $rolePermissions = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    echo json_encode($rolePermissions);
 }
 ?>
