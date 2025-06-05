@@ -183,7 +183,6 @@ function updateStock($link, $id = null, $user_id = null) {
         }
     }
 
-    // If updated_by is not set in the body, set it to the current user
     if (!in_array('updated_by', array_keys($data))) {
         $set[] = "updated_by = ?";
         $params[] = $user_id;
@@ -219,7 +218,13 @@ function authorizeRequest($link, $user_id) {
         echo json_encode(["message" => "Request ID is required"]);
         return;
     }
-    $stmt = mysqli_prepare($link, "UPDATE item_requests SET authorized = 1, authorized_at = NOW(), authorized_by = ? WHERE id = ? AND approved = 1 AND authorized = 0");
+    
+    $stmt = mysqli_prepare(
+        $link,
+        "UPDATE item_requests 
+         SET authorized = 1, authorized_at = NOW(), authorized_by = ?, dispatched = 1 
+         WHERE id = ? AND status = 'approved' AND (authorized IS NULL OR authorized = 0)"
+    );
     mysqli_stmt_bind_param($stmt, "ii", $user_id, $request_id);
     if (mysqli_stmt_execute($stmt) && mysqli_stmt_affected_rows($stmt) > 0) {
         echo json_encode(["message" => "Request authorized"]);
@@ -256,7 +261,7 @@ function dispatchItem($link, $dispatched_by) {
         return;
     }
 
-    $req_query = "SELECT item_id, quantity_requested FROM item_requests WHERE id = ? AND approved = 1 AND authorized = 1 AND dispatched = 0";
+    $req_query = "SELECT item_id, quantity_requested FROM item_requests WHERE id = ? AND approved_by = 4";
     $stmt = mysqli_prepare($link, $req_query);
     mysqli_stmt_bind_param($stmt, "i", $request_id);
     mysqli_stmt_execute($stmt);
@@ -293,7 +298,7 @@ function dispatchItem($link, $dispatched_by) {
         mysqli_stmt_bind_param($stmt, "ii", $quantity, $item_id);
         mysqli_stmt_execute($stmt);
 
-        $mark_dispatched = "UPDATE item_requests SET dispatched = 1, dispatched_at = NOW() WHERE id = ?";
+        $mark_dispatched = "UPDATE item_requests SET dispatched = 1, dispatched_at = NOW(), authorized = 1 WHERE id = ?";
         $stmt = mysqli_prepare($link, $mark_dispatched);
         mysqli_stmt_bind_param($stmt, "i", $request_id);
         mysqli_stmt_execute($stmt);

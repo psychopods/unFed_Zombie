@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /unfedZombie/Controllers/CO/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^api/(.*)$ COController.php?route=$1 [QSA,L]
