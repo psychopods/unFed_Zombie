@@ -82,7 +82,41 @@ elseif (preg_match('#/api/admin/approve-request/(\d+)$#', $path, $matches) && $m
 elseif (preg_match('#/api/admin/authorize-request/(\d+)$#', $path, $matches) && $method === 'PUT') {
     // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/authorize-request/:id
     authorizeRequest($link, $matches[1]);
-} else {
+} 
+// Item Categories
+elseif (strpos($path, '/api/admin/item-categories') !== false && $method === 'POST') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/item-categories
+    createItemCategory($link);
+}
+elseif (preg_match('#/api/admin/item-categories/(\d+)$#', $path, $matches) && $method === 'DELETE') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/item-categories/:id
+    deleteItemCategory($link, $matches[1]);
+}
+
+// Role Permissions
+elseif (strpos($path, '/api/admin/role-permissions') !== false && $method === 'POST') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/role-permissions
+    addRolePermission($link);
+}
+elseif (preg_match('#/api/admin/role-permissions/(\d+)$#', $path, $matches) && $method === 'PUT') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/role-permissions/:id
+    updateRolePermission($link, $matches[1]);
+}
+elseif (preg_match('#/api/admin/role-permissions/(\d+)$#', $path, $matches) && $method === 'DELETE') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/role-permissions/:id
+    deleteRolePermission($link, $matches[1]);
+}
+
+// Roles
+elseif (strpos($path, '/api/admin/roles') !== false && $method === 'POST') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/roles
+    createRole($link);
+}
+elseif (preg_match('#/api/admin/roles/(\d+)$#', $path, $matches) && $method === 'DELETE') {
+    // its api-end point is  http://localhost/unfedZombie/Controllers/admin/api/admin/roles/:id
+    deleteRole($link, $matches[1]);
+}
+else {
     http_response_code(404);
     echo json_encode(["message" => "Endpoint not found"]);
 }
@@ -171,6 +205,123 @@ function dispatchItems($link) {
     mysqli_stmt_bind_param($stmt, "iii", $data['item_id'], $data['quantity'], $data['dispatched_by']);
     if (mysqli_stmt_execute($stmt)) {
         echo json_encode(["message" => "Items dispatched"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function createItemCategory($link) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (empty($data['name'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "Category name is required"]);
+        return;
+    }
+    $stmt = mysqli_prepare($link, "INSERT INTO item_categories (name, description) VALUES (?, ?)");
+    mysqli_stmt_bind_param($stmt, "ss", $data['name'], $data['description']);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Category created"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function deleteItemCategory($link, $id) {
+    $check = mysqli_prepare($link, "SELECT id FROM item_categories WHERE id = ?");
+    mysqli_stmt_bind_param($check, "i", $id);
+    mysqli_stmt_execute($check);
+    mysqli_stmt_store_result($check);
+    if (mysqli_stmt_num_rows($check) === 0) {
+        http_response_code(404);
+        echo json_encode(["error" => "Category not found"]);
+        return;
+    }
+    mysqli_stmt_close($check);
+
+    $stmt = mysqli_prepare($link, "DELETE FROM item_categories WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Category deleted"]);
+    } else {
+        if (mysqli_errno($link) == 1451) {
+            http_response_code(400);
+            echo json_encode(["error" => "Cannot delete category: it is in use by one or more items."]);
+        } else {
+            http_response_code(500);
+            echo json_encode(["error" => mysqli_error($link)]);
+        }
+    }
+}
+
+function addRolePermission($link) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (empty($data['role_id']) || empty($data['permission_id'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "role_id and permission_id are required"]);
+        return;
+    }
+    $stmt = mysqli_prepare($link, "INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)");
+    mysqli_stmt_bind_param($stmt, "ii", $data['role_id'], $data['permission_id']);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Role permission added"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function updateRolePermission($link, $id) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (empty($data['role_id']) || empty($data['permission_id'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "role_id and permission_id are required"]);
+        return;
+    }
+    $stmt = mysqli_prepare($link, "UPDATE role_permissions SET role_id = ?, permission_id = ? WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "iii", $data['role_id'], $data['permission_id'], $id);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Role permission updated"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function deleteRolePermission($link, $id) {
+    $stmt = mysqli_prepare($link, "DELETE FROM role_permissions WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Role permission deleted"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function createRole($link) {
+    $data = json_decode(file_get_contents("php://input"), true);
+    if (empty($data['name'])) {
+        http_response_code(400);
+        echo json_encode(["message" => "Role name is required"]);
+        return;
+    }
+    $stmt = mysqli_prepare($link, "INSERT INTO roles (name, description) VALUES (?, ?)");
+    mysqli_stmt_bind_param($stmt, "ss", $data['name'], $data['description']);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Role created"]);
+    } else {
+        http_response_code(500);
+        echo json_encode(["error" => mysqli_error($link)]);
+    }
+}
+
+function deleteRole($link, $id) {
+    $stmt = mysqli_prepare($link, "DELETE FROM roles WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    if (mysqli_stmt_execute($stmt)) {
+        echo json_encode(["message" => "Role deleted"]);
     } else {
         http_response_code(500);
         echo json_encode(["error" => mysqli_error($link)]);
